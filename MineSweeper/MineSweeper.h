@@ -60,6 +60,25 @@ private:
 	void showBoardValues();
 
 	/**
+	 * @brief checks if bomb is on the specified tile
+	 * 
+	 * @param row row of the checked tile
+	 * @param col column of the checked tile
+	 * @return true if the bomb was on the tile
+	 * @return false if bomb was not on the tile
+	 */
+	bool isBomb(unsigned int row, unsigned int col);
+
+	/**
+	 * @brief checks if bomb is on the specified tile
+	 * 
+	 * @param index index of the checked tile
+	 * @return true if the bomb was on the tile
+	 * @return false if bomb was not on the tile
+	 */
+	bool isBomb(int index);
+
+	/**
 	 * @brief Starts all of the filling functions 
 	 */
 	void fillBoard();
@@ -80,6 +99,49 @@ private:
 	void fillBoardWithNumbers();
 
 	/**
+	 * @brief checks if specified tile exists
+	 * 
+	 * @param tileIndex index of a checked tile
+	 * @return true if tile exists
+	 * @return false if tile doesn't exist
+	 */
+	bool doesTileExist(int tileIndex);
+
+	/**
+	 * @brief checks if the tile with next index is on another row
+	 * 
+	 * @param tileIndex index of tile to check
+	 * @return true if next tile is on another row
+	 * @return false if next tile is on the same row
+	 */
+	bool isNextTileOnAnotherRow(int tileIndex);
+	
+	/**
+	 * @brief checks if the tile with previous index is on another row
+	 * 
+	 * @param tileIndex index of tile to check
+	 * @return true if previous tile is on another row
+	 * @return false if previous tile is on the same row
+	 */
+	bool isPreviousTileOnAnotherRow(int tileIndex);
+
+	/**
+	 * @brief Checks if tile is valid, runs other validation methods
+	 * 
+	 * @param tileIndex index of the checked tile
+	 * @return true if tile is valid
+	 * @return false if tile is not valid
+	 */
+	bool isTileValid(int tileIndex);
+
+	/**
+	 * @brief Increments the tile values near the bomb
+	 * 
+	 * @param bombIndex index of the bomb
+	 */
+	void increaseTileValuesNearBomb(int bombIndex);
+
+	/**
 	 * @brief Board dimensions and bomb count on the board
 	 */
 	unsigned int mWidth, mHeight, mBombsCount;
@@ -88,6 +150,7 @@ private:
 	 * @brief Board represented as std::vector to allow use of "std::sample"
 	 */
 	std::vector<int> mBoard;
+	std::vector<int> mBombsIndexList;
 
 	/**
 	 * @brief Board width * board height

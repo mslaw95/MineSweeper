@@ -33,7 +33,6 @@ void MineSweeper::start(gameType type) {
 void MineSweeper::startConsoleGame() { 
 	fillBoard();
 	showBoardValues();
-	// FillBoardWithNumbers
 	// HideBoardValues
 	// RefreshBoard
 	// IsBomb
@@ -42,11 +41,11 @@ void MineSweeper::startConsoleGame() {
 }
 
 int MineSweeper::getBoardTileValue(unsigned int row, unsigned int col) {
-	return mBoard[row + col*mWidth];
+	return mBoard[col + row*mWidth];
 }
 
 void MineSweeper::setBoardTileValue(unsigned int row, unsigned int col, int value) {
-	mBoard[row + col*mWidth] = value;
+	mBoard[col + row*mWidth] = value;
 }
 
 void MineSweeper::showBoardValues() {
@@ -54,6 +53,22 @@ void MineSweeper::showBoardValues() {
 		std::cout << mBoard[i - 1] << " ";
 		if (!(i % mWidth)) std::cout << "\n";
 	}
+}
+
+bool MineSweeper::isBomb(unsigned int row, unsigned int col) {
+	if (getBoardTileValue(row, col) == -1) {
+		return true;
+	}
+
+	return false;
+}
+
+bool MineSweeper::isBomb(int index) {
+	if (mBoard[index] == -1) {
+		return true;
+	}
+
+	return false;
 }
 
 void MineSweeper::fillBoard() {
@@ -70,20 +85,70 @@ void MineSweeper::fillBoardWithZeros() {
 
 void MineSweeper::fillBoardWithBombs() {
 	std::vector<int> tilesIndexList(mBoardSize);
-	std::vector<int> bombsIndexList;
 	std::iota (std::begin(tilesIndexList), std::end(tilesIndexList), 0);
 
 	std::sample(tilesIndexList.begin(), tilesIndexList.end(),
-		std::back_inserter(bombsIndexList),
+		std::back_inserter(mBombsIndexList),
 		mBombsCount,
 		std::mt19937{std::random_device{}()}
 	);
 
-	for(auto index : bombsIndexList) {
+	for(auto index : mBombsIndexList) {
 		mBoard[index] = -1;
 	}
 }
 
-void MineSweeper::fillBoardWithNumbers() {} // TODO next
+void MineSweeper::fillBoardWithNumbers() {
+	for (auto index : mBombsIndexList) {
+		increaseTileValuesNearBomb(index);
+	}
+}
+
+bool MineSweeper::doesTileExist(int tileIndex) {
+	if(tileIndex < 0 || tileIndex > mBoardSize) {
+		return false;
+	}
+
+	return true;
+}
+
+bool MineSweeper::isNextTileOnAnotherRow(int tileIndex) {
+	return !((tileIndex + 1) % mWidth) ? true : false;
+}
+
+bool MineSweeper::isPreviousTileOnAnotherRow(int tileIndex) {
+	return !(tileIndex % mWidth) ? true : false;
+}
+
+bool MineSweeper::isTileValid(int tileIndex) {
+	if (!doesTileExist(tileIndex)) return false;
+	if (!isBomb(tileIndex)) return false;
+
+	return true;
+}
+
+void MineSweeper::increaseTileValuesNearBomb(int bombIndex) {
+if (!isNextTileOnAnotherRow(bombIndex)) {
+	if (doesTileExist(bombIndex + 1) && !isBomb(bombIndex + 1)) 
+		++mBoard[bombIndex + 1];
+	if (doesTileExist(bombIndex + 1 - mWidth) && !isBomb(bombIndex + 1 - mWidth)) 
+		++mBoard[bombIndex + 1 - mWidth];
+	if (doesTileExist(bombIndex + 1 + mWidth) && !isBomb(bombIndex + 1 + mWidth)) 
+		++mBoard[bombIndex + 1 + mWidth];
+}
+if (!isPreviousTileOnAnotherRow(bombIndex)) {
+	if (doesTileExist(bombIndex - 1) && !isBomb(bombIndex - 1)) 
+		++mBoard[bombIndex - 1];
+	if (doesTileExist(bombIndex - 1 - mWidth) && !isBomb(bombIndex - 1 - mWidth)) 
+		++mBoard[bombIndex - 1 - mWidth];
+	if (doesTileExist(bombIndex - 1 + mWidth) && !isBomb(bombIndex - 1 + mWidth)) 
+		++mBoard[bombIndex - 1 + mWidth];
+}
+
+if (doesTileExist(bombIndex - mWidth) && !isBomb(bombIndex - mWidth)) 
+	++mBoard[bombIndex - mWidth];
+if (doesTileExist(bombIndex + mWidth) && !isBomb(bombIndex + mWidth)) 
+	++mBoard[bombIndex + mWidth];
+}
 
 void MineSweeper::startWindowGame() {} // TODO in vast future
