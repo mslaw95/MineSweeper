@@ -12,8 +12,20 @@ void Tile::setBomb() {
 	this->mValue = -1;
 }
 
+void Tile::setFlag() {
+	this->mFlag = !mFlag;
+}
+
+void Tile::reveal() {
+	this->mHidden = false;
+}
+
 bool Tile::isBomb() {
 	return this->mValue == -1 ? true : false;
+}
+
+bool Tile::isFlagged() {
+	return this->mFlag;
 }
 
 bool Tile::isHidden() {

@@ -33,12 +33,66 @@ void MineSweeper::start(gameType type) {
 }
 
 void MineSweeper::startConsoleGame() { 
-	fillBoard();
-	showBoardValues();
-	// HideBoardValues
-	// RefreshBoard
-	// GameLoop
-	// Some algorithm to uncover all zeros at once
+	// TODO - start menu (switch) + game tooltip
+	generateBoard();
+	gameLoop();
+	// TODO - Some algorithm to uncover all zeros at once
+}
+
+// TODO - write into smaller functions
+void MineSweeper::gameLoop() {
+	bool gameEnded = false;
+	int row, col;
+	char flag;
+
+	while(!gameEnded) {
+		// Refresh the board after every move
+		showBoard();
+
+		// Enter coords and flag
+		std::cout << "Enter row: ";
+		std::cin >> row;
+		std::cout << "Enter column: ";
+		std::cin >> col;
+		std::cout << "Do you want to flag (y, n): ";
+		std::cin >> flag;
+		
+		// Get pointer to the specified tile
+		Tile* boardTile = getBoardTile(row - 1, col - 1);
+
+		// Check if tile was flagged
+		if (flag == 'y') {
+			boardTile->setFlag();
+		} else {
+			// Check if tile isn't flagged already
+			if (!boardTile->isFlagged()) {
+				// Check if bomb was hit
+				if (boardTile->isBomb()) {
+					boardTile->reveal();
+					showBoard();
+					std::cout << "You Lost!\n";
+					gameEnded = true;
+				// Reveal tile if all checks passed
+				} else {
+					boardTile->reveal();
+				}
+			}
+		}
+		
+		// Check if only bombs are left unrevealed
+		for (int i = 0; i < mBoardSize; ++i) {
+			boardTile = getBoardTile(i);
+			if (!boardTile->isBomb() && boardTile->isHidden()) {
+				break;
+			} 
+			
+			if (i == mBoardSize - 1) {
+				std::cout << "Gratulations, You Won!\n";
+				gameEnded = true;
+				break;
+			}
+		}
+	}
 }
 
 void MineSweeper::initBoard() {
@@ -48,26 +102,38 @@ void MineSweeper::initBoard() {
 	}
 }
 
-Tile MineSweeper::getBoardTile(unsigned int row, unsigned int col) {
-	return mBoard[col + row*mWidth];
+Tile* MineSweeper::getBoardTile(unsigned int row, unsigned int col) {
+	return &mBoard[col + row*mWidth];
 }
 
-Tile MineSweeper::getBoardTile(int index) {
-	return mBoard[index];
+Tile* MineSweeper::getBoardTile(int index) {
+	return &mBoard[index];
 }
 
 void MineSweeper::setBoardTileValue(unsigned int row, unsigned int col, int value) {
 	mBoard[col + row*mWidth].setValue(value);
 }
 
-void MineSweeper::showBoardValues() {
+void MineSweeper::showBoard() {
+	// TODO - Legend at the top of the board
+	std::cout << "\n";
 	for (int i = 1; i <= mBoardSize; ++i) {
-		std::cout << mBoard[i - 1].getValue() << " ";
+		Tile boardTile = mBoard[i - 1];
+		if (boardTile.isHidden() && boardTile.isFlagged()) {
+			std::cout << " @ ";
+		} else if (boardTile.isHidden() && !boardTile.isFlagged()) {
+			std::cout << " # ";
+		} else if (!boardTile.isHidden() && !boardTile.isFlagged() && boardTile.isBomb()) {
+			std::cout << " X ";
+		} else {
+			std::cout << " " << boardTile.getValue() << " ";
+		}
+
 		if (!(i % mWidth)) std::cout << "\n";
 	}
 }
 
-void MineSweeper::fillBoard() {
+void MineSweeper::generateBoard() {
 	fillBoardWithBombs();
 	fillBoardWithNumbers();
 }
@@ -107,28 +173,28 @@ bool MineSweeper::isPreviousTileOnAnotherRow(int tileIndex) {
 
 bool MineSweeper::isTileValid(int tileIndex) {
 	if (!doesTileExist(tileIndex)) return false;
-	if (!getBoardTile(tileIndex).isBomb()) return false;
+	if (!getBoardTile(tileIndex)->isBomb()) return false;
 
 	return true;
 }
 
-// TODO make this into smaller functions
+// TODO - write into smaller functions
 void MineSweeper::increaseTileValuesNearBomb(int bombIndex) {
 	// Right column near bomb
 	if (!isNextTileOnAnotherRow(bombIndex)) {
 		// Right
 		if (doesTileExist(bombIndex + 1) && 
-			!getBoardTile(bombIndex + 1).isBomb()) {
+			!getBoardTile(bombIndex + 1)->isBomb()) {
 			++mBoard[bombIndex + 1];
 		}
 		// Right up
 		if (doesTileExist(bombIndex + 1 - mWidth) && 
-			!getBoardTile(bombIndex + 1 - mWidth).isBomb()) {
+			!getBoardTile(bombIndex + 1 - mWidth)->isBomb()) {
 			++mBoard[bombIndex + 1 - mWidth];
 		}
 		// Right below
 		if (doesTileExist(bombIndex + 1 + mWidth) && 
-			!getBoardTile(bombIndex + 1 + mWidth).isBomb()) {
+			!getBoardTile(bombIndex + 1 + mWidth)->isBomb()) {
 			++mBoard[bombIndex + 1 + mWidth];
 		}
 	}
@@ -136,32 +202,32 @@ void MineSweeper::increaseTileValuesNearBomb(int bombIndex) {
 	if (!isPreviousTileOnAnotherRow(bombIndex)) {
 		// Left
 		if (doesTileExist(bombIndex - 1) && 
-			!getBoardTile(bombIndex - 1).isBomb()) {
+			!getBoardTile(bombIndex - 1)->isBomb()) {
 			++mBoard[bombIndex - 1];
 		}
 		// Left up
 		if (doesTileExist(bombIndex - 1 - mWidth) && 
-			!getBoardTile(bombIndex - 1 - mWidth).isBomb()) {
+			!getBoardTile(bombIndex - 1 - mWidth)->isBomb()) {
 			++mBoard[bombIndex - 1 - mWidth];
 		}
 		//Left below
 		if (doesTileExist(bombIndex - 1 + mWidth) && 
-			!getBoardTile(bombIndex - 1 + mWidth).isBomb()) {
+			!getBoardTile(bombIndex - 1 + mWidth)->isBomb()) {
 			++mBoard[bombIndex - 1 + mWidth];
 		}
 	}
 
 	// Up 
 	if (doesTileExist(bombIndex - mWidth) && 
-		!getBoardTile(bombIndex - mWidth).isBomb()) {
+		!getBoardTile(bombIndex - mWidth)->isBomb()) {
 		++mBoard[bombIndex - mWidth];
 	}
 
 	// Below
 	if (doesTileExist(bombIndex + mWidth) && 
-		!getBoardTile(bombIndex + mWidth).isBomb()) {
+		!getBoardTile(bombIndex + mWidth)->isBomb()) {
 		++mBoard[bombIndex + mWidth];
 	}
 }
 
-void MineSweeper::startWindowGame() {} // TODO in vast future
+void MineSweeper::startWindowGame() {} // TODO - in vast future (optional)

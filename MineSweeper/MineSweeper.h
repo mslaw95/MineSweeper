@@ -29,18 +29,21 @@ private:
 	// Initializes mBoard
 	void initBoard();
 
+	// Game loop
+	void gameLoop();
+
 	// Get the value of the specified board tile
-	Tile getBoardTile(unsigned int row, unsigned int col);
-	Tile getBoardTile(int index);
+	Tile* getBoardTile(unsigned int row, unsigned int col);
+	Tile* getBoardTile(int index);
 
 	// Set the value of the specified board tile
 	void setBoardTileValue(unsigned int row, unsigned int col, int value);
 
 	// Helper function showing values stored in mBoard
-	void showBoardValues();
+	void showBoard();
 
-	// Starts all of the filling functions 
-	void fillBoard();
+	// Generates new board 
+	void generateBoard();
 
 	// Fills the board randomly with bombs represented as "-1"
 	void fillBoardWithBombs();
