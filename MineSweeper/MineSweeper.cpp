@@ -30,7 +30,10 @@ void MineSweeper::startGame() {
 			startGame();
 			break;
 		case 2:
-			std::cout << "ASD\n\n";
+			std::cout << "To win, You have to reveal all tiles which are not bombs." 
+				"Number on the revealed tile tells how many bombs are around." 
+				"If You know there is a bomb on a tile," 
+				"you can flag it so it cannot be interacted with.\n\n";
 			system("PAUSE");
 			startGame();
 			break;
@@ -60,19 +63,12 @@ void MineSweeper::gameLoop() {
 	int row, col;
 	char flag;
 
-	while(!gameEnded) {
+	while (!gameEnded) {
 		// Refresh the board after every move
 		showBoard();
 
-		// TODO - Protect from entering wrong type e.g. letter 
-		// TODO - Protect from entering non existing row/column
-		// Enter row, col and flag
-		std::cout << "Enter row number (starts from 1): ";
-		std::cin >> row;
-		std::cout << "Enter column number (starts from 1): ";
-		std::cin >> col;
-		std::cout << "Do you want to flag (y, n): ";
-		std::cin >> flag;
+		// Get and validate input from player
+		getPlayerInput(row, col, flag);
 		
 		// Get pointer to the specified tile
 		Tile* boardTile = getBoardTile(row - 1, col - 1);
@@ -111,6 +107,51 @@ void MineSweeper::gameLoop() {
 			}
 		}
 	}
+}
+
+void MineSweeper::getPlayerInput(int& row, int& col, char& flag) {
+	row = getRowInput();
+	col = getColInput();
+	flag = getFlagInput();
+}
+
+int MineSweeper::getRowInput() {
+	int row;
+	
+	while ((std::cout << "Enter row number (starts from 1): ") && 
+		(!(std::cin >> row) || row < 1 || row > mWidth)) {
+		std::cout << "\nYou entered invalid row number!\n";
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	} 
+
+	return row;
+}
+
+int MineSweeper::getColInput() {
+	int col;
+
+	while ((std::cout << "Enter column number (starts from 1): ") && 
+		(!(std::cin >> col) || col < 1 || col > mHeight)) {
+		std::cout << "\nYou entered invalid column number!\n";
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	} 
+	
+	return col;
+}
+
+char MineSweeper::getFlagInput() {
+	char flag;
+	
+	while ((std::cout << "Do you want to flag (y, n): ") && 
+		(!(std::cin >> flag) || (flag != 'y' && flag != 'n'))) {
+		std::cout << "\nYou entered ivalid input. Write either 'y' or 'n'\n";
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+	
+	return flag;
 }
 
 Tile* MineSweeper::getBoardTile(unsigned int row, unsigned int col) {

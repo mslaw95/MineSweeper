@@ -29,6 +29,14 @@ private:
 	// Game loop
 	void gameLoop();
 
+	// Get player input of chosen tile
+	void getPlayerInput(int& row, int& col, char& flag);
+
+	// Get player input for row, col and flag
+	int getRowInput();
+	int getColInput();
+	char getFlagInput();
+
 	// Get the value of the specified board tile
 	Tile* getBoardTile(unsigned int row, unsigned int col);
 	Tile* getBoardTile(int index);
@@ -67,7 +75,7 @@ private:
 	void increaseTileValuesNearBomb(int bombIndex);
 
 	// Board dimensions and bomb count on the board
-	unsigned int mWidth, mHeight, mBombsCount;
+	int mWidth, mHeight, mBombsCount;
 
 	// Board represented as std::vector to allow use of "std::sample"
 	std::vector<Tile> mBoard;
