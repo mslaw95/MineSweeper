@@ -2,44 +2,59 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <stdlib.h>
 #include <vector>
 #include "MineSweeper.h"
 
 MineSweeper::MineSweeper() : mWidth(3), mHeight(3), mBombsCount(3) {
 	mBoardSize = mWidth*mHeight;
-	initBoard();
 }
 
 MineSweeper::MineSweeper(unsigned int boardWidth, unsigned int boardHeight, 
 	unsigned int bombsCount) : mWidth(boardWidth), mHeight(boardHeight), 
 	mBombsCount(bombsCount) { 
 	mBoardSize = mWidth*mHeight;
-	initBoard();
 }
 
 MineSweeper::~MineSweeper() { }
 
-void MineSweeper::start(gameType type) {
-	switch (type) {
-	case CONSOLE:
-		startConsoleGame();
-		break;
-	case WINDOW:
-		startWindowGame();
-		break;
-	default:
-		break;
+void MineSweeper::startGame() {
+	printMenu();
+	int playersChoice;
+	std::cin >> playersChoice;
+	system("CLS");
+	switch (playersChoice) {
+		case 1:
+			generateBoard();
+			gameLoop();
+			startGame();
+			break;
+		case 2:
+			std::cout << "ASD\n\n";
+			system("PAUSE");
+			startGame();
+			break;
+		case 3:
+			std::cout << "Legend:\n# - Hidden tile\n@ - Flagged tile\nX - Bomb\n\n";
+			system("PAUSE");
+			startGame();
+			break;
+		case 4:
+			return;
 	}
 }
 
-void MineSweeper::startConsoleGame() { 
-	// TODO - start menu (switch) + game tooltip
-	generateBoard();
-	gameLoop();
-	// TODO - Some algorithm to uncover all zeros at once
+void MineSweeper::printMenu() {
+	system("CLS");
+	std::cout << "Menu\n";
+	std::cout << "1. New game\n";
+	std::cout << "2. Instructions\n";
+	std::cout << "3. Legend\n";
+	std::cout << "4. Exit\n";
 }
 
 // TODO - write into smaller functions
+// TODO - Some algorithm to uncover all zeros at once
 void MineSweeper::gameLoop() {
 	bool gameEnded = false;
 	int row, col;
@@ -49,10 +64,12 @@ void MineSweeper::gameLoop() {
 		// Refresh the board after every move
 		showBoard();
 
-		// Enter coords and flag
-		std::cout << "Enter row: ";
+		// TODO - Protect from entering wrong type e.g. letter 
+		// TODO - Protect from entering non existing row/column
+		// Enter row, col and flag
+		std::cout << "Enter row number (starts from 1): ";
 		std::cin >> row;
-		std::cout << "Enter column: ";
+		std::cout << "Enter column number (starts from 1): ";
 		std::cin >> col;
 		std::cout << "Do you want to flag (y, n): ";
 		std::cin >> flag;
@@ -72,6 +89,7 @@ void MineSweeper::gameLoop() {
 					showBoard();
 					std::cout << "You Lost!\n";
 					gameEnded = true;
+					system("PAUSE");
 				// Reveal tile if all checks passed
 				} else {
 					boardTile->reveal();
@@ -95,13 +113,6 @@ void MineSweeper::gameLoop() {
 	}
 }
 
-void MineSweeper::initBoard() {
-	for (int i = 0; i < mBoardSize; ++i) {
-		Tile tile;
-		mBoard.push_back(tile);
-	}
-}
-
 Tile* MineSweeper::getBoardTile(unsigned int row, unsigned int col) {
 	return &mBoard[col + row*mWidth];
 }
@@ -110,39 +121,60 @@ Tile* MineSweeper::getBoardTile(int index) {
 	return &mBoard[index];
 }
 
-void MineSweeper::setBoardTileValue(unsigned int row, unsigned int col, int value) {
-	mBoard[col + row*mWidth].setValue(value);
-}
-
 void MineSweeper::showBoard() {
-	// TODO - Legend at the top of the board
-	std::cout << "\n";
+	// Print board
+	system("CLS");
 	for (int i = 1; i <= mBoardSize; ++i) {
 		Tile boardTile = mBoard[i - 1];
-		if (boardTile.isHidden() && boardTile.isFlagged()) {
-			std::cout << " @ ";
-		} else if (boardTile.isHidden() && !boardTile.isFlagged()) {
-			std::cout << " # ";
-		} else if (!boardTile.isHidden() && !boardTile.isFlagged() && boardTile.isBomb()) {
-			std::cout << " X ";
-		} else {
-			std::cout << " " << boardTile.getValue() << " ";
-		}
 
-		if (!(i % mWidth)) std::cout << "\n";
+		// Choose proper sign for the tile
+		printSignForTile (boardTile);
+
+		// Newline when row ends
+		if (!(i % mWidth)) {
+			std::cout << "\n";
+		}
+	}
+	std::cout << "\n";
+}
+
+void MineSweeper::printSignForTile(Tile boardTile) {
+	if (boardTile.isHidden() && boardTile.isFlagged()) {
+		std::cout << " @ ";
+	} else if (boardTile.isHidden() && !boardTile.isFlagged()) {
+		std::cout << " # ";
+	} else if (!boardTile.isHidden() && !boardTile.isFlagged() && boardTile.isBomb()) {
+		std::cout << " X ";
+	} else {
+		std::cout << " " << boardTile.getValue() << " ";
 	}
 }
 
 void MineSweeper::generateBoard() {
+	cleanBoard();
+	initBoard();
 	fillBoardWithBombs();
 	fillBoardWithNumbers();
+}
+
+void MineSweeper::cleanBoard() {
+	mBombsIndexList.clear();
+	mBoard.clear();
+}
+
+void MineSweeper::initBoard() {
+	for (int i = 0; i < mBoardSize; ++i) {
+		Tile tile;
+		mBoard.push_back(tile);
+	}
 }
 
 void MineSweeper::fillBoardWithBombs() {
 	std::vector<int> tilesIndexList(mBoardSize);
 	std::iota (std::begin(tilesIndexList), std::end(tilesIndexList), 0);
 
-	std::sample(tilesIndexList.begin(), tilesIndexList.end(),
+	// Random bomb generation
+	std::sample (tilesIndexList.begin(), tilesIndexList.end(),
 		std::back_inserter(mBombsIndexList),
 		mBombsCount,
 		std::mt19937{std::random_device{}()}
@@ -229,5 +261,3 @@ void MineSweeper::increaseTileValuesNearBomb(int bombIndex) {
 		++mBoard[bombIndex + mWidth];
 	}
 }
-
-void MineSweeper::startWindowGame() {} // TODO - in vast future (optional)

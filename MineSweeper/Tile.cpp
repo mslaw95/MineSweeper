@@ -20,6 +20,10 @@ void Tile::reveal() {
 	this->mHidden = false;
 }
 
+void Tile::hide() {
+	this->mHidden = true;
+}
+
 bool Tile::isBomb() {
 	return this->mValue == -1 ? true : false;
 }

@@ -26,6 +26,9 @@ public:
     // Reveals the tile
     void reveal();
 
+    // Hides the tile
+    void hide();
+
     // Allows incrementing the value of a tile by ++
     int operator++();
 

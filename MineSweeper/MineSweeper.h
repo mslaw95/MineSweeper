@@ -4,9 +4,6 @@
 
 class MineSweeper {
 public:
-	// Specifies if game is run in console or in window
-	enum gameType { CONSOLE, WINDOW };
-
 	// Construct a new default Mine Sweeper object
 	MineSweeper();
 
@@ -17,14 +14,14 @@ public:
 	~MineSweeper();
 
 	// Starts the chosen game type
-	void start(gameType);
+	void startGame();
 
 private:
-	// Starts Console mode
-	void startConsoleGame();
+	// Starts the game
+	void start();
 
-	// Starts Window mode
-	void startWindowGame();
+	// Pints menu for the game
+	void printMenu();
 
 	// Initializes mBoard
 	void initBoard();
@@ -36,14 +33,17 @@ private:
 	Tile* getBoardTile(unsigned int row, unsigned int col);
 	Tile* getBoardTile(int index);
 
-	// Set the value of the specified board tile
-	void setBoardTileValue(unsigned int row, unsigned int col, int value);
-
 	// Helper function showing values stored in mBoard
 	void showBoard();
+	
+	// Prints sign on the board depending on tile's properties
+	void printSignForTile(Tile boardTile);
 
 	// Generates new board 
 	void generateBoard();
+
+	// Returns the board to its initial state
+	void cleanBoard();
 
 	// Fills the board randomly with bombs represented as "-1"
 	void fillBoardWithBombs();
